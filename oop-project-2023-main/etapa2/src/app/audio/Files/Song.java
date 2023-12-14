@@ -5,6 +5,9 @@ import lombok.Getter;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The type Song.
+ */
 @Getter
 public final class Song extends AudioFile {
     private final String album;
@@ -15,10 +18,21 @@ public final class Song extends AudioFile {
     private final String artist;
     private Integer likes;
 
+    /**
+     * Instantiates a new Song.
+     *
+     * @param name        the name
+     * @param duration    the duration
+     * @param album       the album
+     * @param tags        the tags
+     * @param lyrics      the lyrics
+     * @param genre       the genre
+     * @param releaseYear the release year
+     * @param artist      the artist
+     */
     public Song(final String name, final Integer duration, final String album,
-                final ArrayList<String> tags, final String lyrics,
-                final String genre, final Integer releaseYear,
-                final String artist) {
+                final ArrayList<String> tags, final String lyrics, final String genre,
+                final Integer releaseYear, final String artist) {
         super(name, duration);
         this.album = album;
         this.tags = tags;
@@ -30,17 +44,18 @@ public final class Song extends AudioFile {
     }
 
     @Override
-    public boolean matchesAlbum(final String album) {
-        return this.getAlbum().equalsIgnoreCase(album);
+    public boolean matchesAlbum(final String albumName) {
+        return this.getAlbum().equalsIgnoreCase(albumName);
     }
 
     @Override
-    public boolean matchesTags(final ArrayList<String> tags) {
+    public boolean matchesTags(final ArrayList<String> tagsList) {
         List<String> songTags = new ArrayList<>();
         for (String tag : this.getTags()) {
             songTags.add(tag.toLowerCase());
         }
-        for (String tag : tags) {
+
+        for (String tag : tagsList) {
             if (!songTags.contains(tag.toLowerCase())) {
                 return false;
             }
@@ -48,23 +63,23 @@ public final class Song extends AudioFile {
         return true;
     }
     @Override
-    public boolean matchesLyrics(final String lyrics) {
-        return this.getLyrics().toLowerCase().contains(lyrics.toLowerCase());
+    public boolean matchesLyrics(final String lyricFilter) {
+        return this.getLyrics().toLowerCase().contains(lyricFilter.toLowerCase());
     }
 
     @Override
-    public boolean matchesGenre(final String genre) {
-        return this.getGenre().equalsIgnoreCase(genre);
+    public boolean matchesGenre(final String genreFilter) {
+        return this.getGenre().equalsIgnoreCase(genreFilter);
     }
 
     @Override
-    public boolean matchesArtist(final String artist) {
-        return this.getArtist().equalsIgnoreCase(artist);
+    public boolean matchesArtist(final String artistFilter) {
+        return this.getArtist().equalsIgnoreCase(artistFilter);
     }
 
     @Override
-    public boolean matchesReleaseYear(final String releaseYear) {
-        return filterByYear(this.getReleaseYear(), releaseYear);
+    public boolean matchesReleaseYear(final String releaseYearFilter) {
+        return filterByYear(this.getReleaseYear(), releaseYearFilter);
     }
 
     private static boolean filterByYear(final int year, final String query) {
@@ -77,11 +92,16 @@ public final class Song extends AudioFile {
         }
     }
 
-
+    /**
+     * Like.
+     */
     public void like() {
         likes++;
     }
 
+    /**
+     * Dislike.
+     */
     public void dislike() {
         likes--;
     }

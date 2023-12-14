@@ -1,7 +1,12 @@
 package app.user;
 
 import app.Admin;
-import app.audio.Collections.*;
+import app.audio.Collections.Playlist;
+import app.audio.Collections.InfoAlbum;
+import app.audio.Collections.Album;
+import app.audio.Collections.Podcast;
+import app.audio.Collections.AudioCollection;
+import app.audio.Collections.PlaylistOutput;
 import app.audio.Files.AudioFile;
 import app.audio.Files.Episode;
 import app.audio.Files.Song;

@@ -7,6 +7,9 @@ import lombok.Getter;
 
 import java.util.ArrayList;
 
+/**
+ * The type Playlist.
+ */
 @Getter
 public final class Playlist extends AudioCollection {
     private final ArrayList<Song> songs;
@@ -14,10 +17,23 @@ public final class Playlist extends AudioCollection {
     private Integer followers;
     private int timestamp;
 
+    /**
+     * Instantiates a new Playlist.
+     *
+     * @param name  the name
+     * @param owner the owner
+     */
     public Playlist(final String name, final String owner) {
         this(name, owner, 0);
     }
 
+    /**
+     * Instantiates a new Playlist.
+     *
+     * @param name      the name
+     * @param owner     the owner
+     * @param timestamp the timestamp
+     */
     public Playlist(final String name, final String owner, final int timestamp) {
         super(name, owner);
         this.songs = new ArrayList<>();
@@ -26,21 +42,46 @@ public final class Playlist extends AudioCollection {
         this.timestamp = timestamp;
     }
 
+    /**
+     * Contains song boolean.
+     *
+     * @param song the song
+     * @return the boolean
+     */
     public boolean containsSong(final Song song) {
         return songs.contains(song);
     }
 
+    /**
+     * Add song.
+     *
+     * @param song the song
+     */
     public void addSong(final Song song) {
         songs.add(song);
     }
 
+    /**
+     * Remove song.
+     *
+     * @param song the song
+     */
     public void removeSong(final Song song) {
         songs.remove(song);
     }
+
+    /**
+     * Remove song.
+     *
+     * @param index the index
+     */
     public void removeSong(final int index) {
         songs.remove(index);
     }
 
+    /**
+     * Switch visibility.
+     */
     public void switchVisibility() {
         if (visibility == Enums.Visibility.PUBLIC) {
             visibility = Enums.Visibility.PRIVATE;
@@ -49,10 +90,16 @@ public final class Playlist extends AudioCollection {
         }
     }
 
+    /**
+     * Increase followers.
+     */
     public void increaseFollowers() {
         followers++;
     }
 
+    /**
+     * Decrease followers.
+     */
     public void decreaseFollowers() {
         followers--;
     }
@@ -75,8 +122,8 @@ public final class Playlist extends AudioCollection {
     }
 
     @Override
-    public boolean matchesFollowers(final String followers) {
-        return filterByFollowersCount(this.getFollowers(), followers);
+    public boolean matchesFollowers(final String followerNum) {
+        return filterByFollowersCount(this.getFollowers(), followerNum);
     }
 
     private static boolean filterByFollowersCount(final int count, final String query) {

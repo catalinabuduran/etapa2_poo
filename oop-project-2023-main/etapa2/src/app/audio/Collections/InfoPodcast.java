@@ -11,9 +11,20 @@ public class InfoPodcast {
         this.episodesName = episodes;
     }
 
+    /**
+     * Get name
+     *
+     * @return
+     */
     public String getName() {
         return name;
     }
+
+    /**
+     * Get episodes
+     *
+     * @return
+     */
     public List<String> getEpisodes() {
         return episodesName;
     }
