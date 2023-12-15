@@ -1,40 +1,40 @@
-package app.user;
+package app.user.contentUser;
 
-public class Merch {
+public class Event {
+    /**
+     * get date
+     *
+     * @return
+     */
+    public String getDate() {
+        return date;
+    }
+
+    /**
+     * Set date
+     *
+     * @param date
+     */
+    public void setDate(final String date) {
+        this.date = date;
+    }
+
     private String name;
     private String description;
-    private double price;
+    private String date;
 
     /**
      * Constructor
      *
      * @param name
      * @param description
-     * @param price
+     * @param date
      */
-    public Merch(final String name, final String description,
-                 final double price) {
+    public Event(final String name, final String description,
+                 final String date) {
         this.name = name;
         this.description = description;
-        this.price = price;
-    }
-
-    /**
-     * Get price
-     *
-     * @return
-     */
-    public double getPrice() {
-        return price;
-    }
-
-    /**
-     * Set price
-     *
-     * @param price
-     */
-    public void setPrice(final int price) {
-        this.price = price;
+        this.date = date;
     }
 
     /**
@@ -72,4 +72,5 @@ public class Merch {
     public void setDescription(final String description) {
         this.description = description;
     }
+
 }

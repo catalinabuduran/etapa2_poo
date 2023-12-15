@@ -1,6 +1,9 @@
 package app.user;
 
 import app.audio.Collections.Album;
+import app.user.contentUser.Event;
+import app.user.contentUser.Merch;
+import app.user.contentUser.Page;
 import fileio.input.SongInput;
 
 import java.util.ArrayList;
@@ -13,6 +16,19 @@ public class Artist extends User implements Page {
     private List<Event> events;
     private List<Merch> merchs;
     private String printCurrentPage;
+
+    /**
+     * Get total likes for one artist
+     *
+     * @return
+     */
+    public int getTotalLikes() {
+        int totalLikes = 0;
+        for (Album album : albums) {
+            totalLikes += album.getTotalLikes();
+        }
+        return totalLikes;
+    }
 
     /**
      * Get print current page

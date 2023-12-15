@@ -1,4 +1,4 @@
-package app.audio.Collections;
+package app.audio.Collections.infoCollection;
 
 import java.util.List;
 

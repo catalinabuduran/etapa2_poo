@@ -1,6 +1,8 @@
 package app.user;
 
 import app.audio.Collections.Podcast;
+import app.user.contentUser.Announcement;
+import app.user.contentUser.Page;
 
 import java.util.ArrayList;
 import java.util.List;

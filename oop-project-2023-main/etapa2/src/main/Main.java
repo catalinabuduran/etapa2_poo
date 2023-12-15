@@ -70,6 +70,7 @@ public final class Main {
      */
     public static void action(final String filePath1,
                               final String filePath2) throws IOException {
+        Admin admin = Admin.getInstance();
         ObjectMapper objectMapper = new ObjectMapper();
         LibraryInput library = objectMapper.readValue(new
                 File(CheckerConstants.TESTS_PATH
@@ -78,15 +79,15 @@ public final class Main {
                 + filePath1), CommandInput[].class);
         ArrayNode outputs = objectMapper.createArrayNode();
 
-        Admin.setUsers(library.getUsers());
-        for (User user: Admin.getUsers()) {
+        admin.setUsers(library.getUsers());
+        for (User user: admin.getUsers()) {
             user.setType("user");
         }
-        Admin.setSongs(library.getSongs());
-        Admin.setPodcasts(library.getPodcasts());
+        admin.setSongs(library.getSongs());
+        admin.setPodcasts(library.getPodcasts());
 
         for (CommandInput command : commands) {
-            Admin.updateTimestamp(command.getTimestamp());
+            admin.updateTimestamp(command.getTimestamp());
 
             String commandName = command.getCommand();
 
@@ -133,6 +134,7 @@ public final class Main {
                 case "removeAlbum" -> outputs.add(CommandRunner.removeAlbum(command));
                 case "getTop5Albums" -> outputs.add(CommandRunner.getTop5Albums(command));
                 case "removeEvent" -> outputs.add(CommandRunner.removeEvent(command));
+                case "getTop5Artists" -> outputs.add(CommandRunner.getTop5Artists(command));
                 default -> System.out.println("Invalid command " + commandName);
             }
         }
@@ -140,6 +142,6 @@ public final class Main {
         ObjectWriter objectWriter = objectMapper.writerWithDefaultPrettyPrinter();
         objectWriter.writeValue(new File(filePath2), outputs);
 
-        Admin.reset();
+        admin.reset();
     }
 }

@@ -1,7 +1,7 @@
 Starting audit...
-[ERROR] C:\Users\catal\OneDrive\Desktop\etapa2_poo\etapa2_poo\oop-project-2023-main\etapa2\.\src\app\Admin.java:10:8: Unused import - app.audio.LibraryEntry. [UnusedImports]
-[ERROR] C:\Users\catal\OneDrive\Desktop\etapa2_poo\etapa2_poo\oop-project-2023-main\etapa2\.\src\app\Admin.java:24:1: Utility classes should not have a public or default constructor. [HideUtilityClassConstructor]
+[ERROR] C:\Users\catal\OneDrive\Desktop\etapa2_poo\etapa2_poo\oop-project-2023-main\etapa2\.\src\app\Admin.java:31:17: Name 'MAGIC_NUMBER' must match pattern '^[a-z][a-zA-Z0-9]*$'. [MemberName]
+[ERROR] C:\Users\catal\OneDrive\Desktop\etapa2_poo\etapa2_poo\oop-project-2023-main\etapa2\.\src\app\Admin.java:31:32: '5' is a magic number. [MagicNumber]
 [ERROR] C:\Users\catal\OneDrive\Desktop\etapa2_poo\etapa2_poo\oop-project-2023-main\etapa2\.\src\app\player\Player.java:222:32: Parameter time should be final. [FinalParameters]
-[ERROR] C:\Users\catal\OneDrive\Desktop\etapa2_poo\etapa2_poo\oop-project-2023-main\etapa2\.\src\app\user\User.java:942:5: Method length is 154 lines (max allowed is 150). [MethodLength]
+[ERROR] C:\Users\catal\OneDrive\Desktop\etapa2_poo\etapa2_poo\oop-project-2023-main\etapa2\.\src\app\user\User.java:954:5: Method length is 177 lines (max allowed is 150). [MethodLength]
 Audit done.
 Checkstyle ends with 4 errors.

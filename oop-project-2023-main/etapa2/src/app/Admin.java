@@ -2,12 +2,11 @@ package app;
 
 import app.audio.Collections.Podcast;
 import app.audio.Collections.Album;
-import app.audio.Collections.InfoPodcast;
+import app.audio.Collections.infoCollection.InfoPodcast;
 import app.audio.Collections.Playlist;
-import app.audio.Collections.InfoAlbum;
+import app.audio.Collections.infoCollection.InfoAlbum;
 import app.audio.Files.Episode;
 import app.audio.Files.Song;
-import app.audio.LibraryEntry;
 import app.user.Artist;
 import app.user.Host;
 import app.user.User;
@@ -21,43 +20,46 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Comparator;
 
-public class Admin extends LibraryEntry {
+public final class Admin {
     @Getter
-    private static List<User> users = new ArrayList<>();
-    private static List<Song> songs = new ArrayList<>();
-    private static List<Podcast> podcasts = new ArrayList<>();
-    private static List<Episode> episodes = new ArrayList<>();
-    private static List<Album> albums = new ArrayList<>();
-    private static final int MAGIC_NUMBER = 5;
-    private static int timestamp = 0;
+    private List<User> users = new ArrayList<>();
+    private List<Song> songs = new ArrayList<>();
+    private List<Podcast> podcasts = new ArrayList<>();
+    private List<Episode> episodes = new ArrayList<>();
+    private List<Album> albums = new ArrayList<>();
+    private static Admin instance;
+    private int MAGIC_NUMBER = 5;
+    private int timestamp = 0;
 
+    /**
+     *
+     * @return
+     */
+    public static synchronized Admin getInstance() {
+        if (instance == null) {
+            instance = new Admin();
+        }
+        return instance;
+    }
+
+    /**
+     * Constructor
+     *
+     */
+    private Admin() {
+        users = new ArrayList<>();
+        songs = new ArrayList<>();
+        podcasts = new ArrayList<>();
+        timestamp = 0;
+    }
     /**
      * Set albums
      *
      * @param albums
      */
-    public static void setAlbums(final List<Album> albums) {
-        Admin.albums = albums;
-    }
-
-    /**
-     * Constructor
-     *
-     * @param name
-     */
-    public Admin(final String name) {
-        super(name);
-    }
-
-    /**
-     * Constructor
-     *
-     * @param username
-     * @param age
-     * @param city
-     */
-    public Admin(final String username, final int age, final String city) {
-        super(username, age, city);
+    public void setAlbums(final List<Album> albums) {
+        Admin admin = Admin.getInstance();
+        admin.albums = albums;
     }
 
     /**
@@ -66,8 +68,9 @@ public class Admin extends LibraryEntry {
      * @param username
      * @return
      */
-    public static List<InfoPodcast> showPodcasts(final String username) {
-        Host host = (Host) Admin.getUser(username);
+    public List<InfoPodcast> showPodcasts(final String username) {
+        Admin admin = Admin.getInstance();
+        Host host = (Host) admin.getUser(username);
         List<InfoPodcast> podcastsInfoList = new ArrayList<>();
         List<Podcast> hostPodcasts = host.getPodcasts();
 
@@ -89,7 +92,7 @@ public class Admin extends LibraryEntry {
      *
      * @return
      */
-    public static List<Song> getSong() {
+    public List<Song> getSong() {
         return songs;
     }
 
@@ -98,7 +101,7 @@ public class Admin extends LibraryEntry {
      *
      * @param userInputList
      */
-    public static void setUsers(final List<UserInput> userInputList) {
+    public void setUsers(final List<UserInput> userInputList) {
         users = new ArrayList<>();
         for (UserInput userInput : userInputList) {
             users.add(new User(userInput.getUsername(), userInput.getAge(), userInput.getCity()));
@@ -110,7 +113,7 @@ public class Admin extends LibraryEntry {
      *
      * @param songInputList
      */
-    public static void setSongs(final List<SongInput> songInputList) {
+    public void setSongs(final List<SongInput> songInputList) {
         songs = new ArrayList<>();
         for (SongInput songInput : songInputList) {
             songs.add(new Song(songInput.getName(), songInput.getDuration(), songInput.getAlbum(),
@@ -124,7 +127,7 @@ public class Admin extends LibraryEntry {
      *
      * @param podcastInputList
      */
-    public static void setPodcasts(final List<PodcastInput> podcastInputList) {
+    public void setPodcasts(final List<PodcastInput> podcastInputList) {
         podcasts = new ArrayList<>();
         for (PodcastInput podcastInput : podcastInputList) {
             List<Episode> episodesPodcast = new ArrayList<>();
@@ -142,7 +145,7 @@ public class Admin extends LibraryEntry {
      *
      * @return
      */
-    public static List<Song> getSongs() {
+    public List<Song> getSongs() {
         return new ArrayList<>(songs);
     }
 
@@ -151,7 +154,7 @@ public class Admin extends LibraryEntry {
      *
      * @return
      */
-    public static List<Podcast> getPodcasts() {
+    public List<Podcast> getPodcasts() {
         return new ArrayList<>(podcasts);
     }
 
@@ -160,7 +163,7 @@ public class Admin extends LibraryEntry {
      *
      * @return
      */
-    public static List<Artist> getArtists() {
+    public List<Artist> getArtists() {
         List<Artist> artists = new ArrayList<>();
         for (User user : users) {
             if (user instanceof Artist) {
@@ -175,7 +178,7 @@ public class Admin extends LibraryEntry {
      * am facut aceasta metoda sa mi returneze lista de podcasturi, nu copie
      * @return
      */
-    public static List<Podcast> getPod() {
+    public List<Podcast> getPod() {
         return podcasts;
     }
 
@@ -184,7 +187,7 @@ public class Admin extends LibraryEntry {
      *
      * @return
      */
-    public static List<Host> getHosts() {
+    public List<Host> getHosts() {
         List<Host> hosts = new ArrayList<>();
         for (User user : users) {
             if (user.getType().equals("host")) {
@@ -200,7 +203,7 @@ public class Admin extends LibraryEntry {
      *
      * @return
      */
-    public static List<Album> getAlbums() {
+    public List<Album> getAlbums() {
         List<Album> artistAlbums = new ArrayList<>();
         for (User user : users) {
             if (user.getType().equals("artist")) {
@@ -216,7 +219,7 @@ public class Admin extends LibraryEntry {
      *
      * @return
      */
-    public static List<Playlist> getPlaylists() {
+    public List<Playlist> getPlaylists() {
         List<Playlist> playlists = new ArrayList<>();
         for (User user : users) {
             playlists.addAll(user.getPlaylists());
@@ -230,7 +233,7 @@ public class Admin extends LibraryEntry {
      * @param username
      * @return
      */
-    public static User getUser(final String username) {
+    public User getUser(final String username) {
         for (User user : users) {
             if (user.getUsername().equals(username)) {
                 return user;
@@ -244,7 +247,7 @@ public class Admin extends LibraryEntry {
      *
      * @return
      */
-    public static List<String> onlineUsers() {
+    public List<String> onlineUsers() {
         List<String> usersOnline = new ArrayList<>();
         for (User user : users) {
             if (user.isOnline()) {
@@ -259,7 +262,7 @@ public class Admin extends LibraryEntry {
      *
      * @return
      */
-    public static List<String> allUsers() {
+    public List<String> allUsers() {
         List<String> allUsers = new ArrayList<>();
         for (User user : users) {
             if (user.getType().equals("user")) {
@@ -284,7 +287,7 @@ public class Admin extends LibraryEntry {
      *
      * @param newTimestamp
      */
-    public static void updateTimestamp(final int newTimestamp) {
+    public void updateTimestamp(final int newTimestamp) {
         int elapsed = newTimestamp - timestamp;
         timestamp = newTimestamp;
         if (elapsed == 0) {
@@ -300,7 +303,7 @@ public class Admin extends LibraryEntry {
      *
      * @return
      */
-    public static List<String> getTop5Songs() {
+    public List<String> getTop5Songs() {
         List<Song> sortedSongs = new ArrayList<>(songs);
         sortedSongs.sort(Comparator.comparingInt(Song::getLikes).reversed());
         List<String> topSongs = new ArrayList<>();
@@ -320,7 +323,7 @@ public class Admin extends LibraryEntry {
      *
      * @return
      */
-    public static List<String> getTop5Albums() {
+    public List<String> getTop5Albums() {
         List<Album> sortedAlbums = new ArrayList<>(albums);
         sortedAlbums.sort(Comparator.comparingInt(Album::getTotalLikes).reversed());
         List<String> topAlbums = new ArrayList<>();
@@ -336,11 +339,32 @@ public class Admin extends LibraryEntry {
     }
 
     /**
+     * get top 5 artists
+     *
+     * @return
+     */
+    public List<String> getTop5Artists() {
+        Admin admin = Admin.getInstance();
+        List<Artist> sortedArtists = new ArrayList<>(admin.getArtists());
+        sortedArtists.sort(Comparator.comparingInt(Artist::getTotalLikes).reversed());
+        List<String> topArtists = new ArrayList<>();
+        int count = 0;
+        for (Artist artist : sortedArtists) {
+            if (count >= MAGIC_NUMBER) {
+                break;
+            }
+            topArtists.add(artist.getName());
+            count++;
+        }
+        return topArtists;
+    }
+
+    /**
      * Get top 5 playlists
      *
      * @return
      */
-    public static List<String> getTop5Playlists() {
+    public List<String> getTop5Playlists() {
         List<Playlist> sortedPlaylists = new ArrayList<>(getPlaylists());
         sortedPlaylists.sort(Comparator.comparingInt(Playlist::getFollowers)
                 .reversed()
@@ -361,7 +385,7 @@ public class Admin extends LibraryEntry {
      * Reset
      *
      */
-    public static void reset() {
+    public void reset() {
         users = new ArrayList<>();
         songs = new ArrayList<>();
         podcasts = new ArrayList<>();
@@ -372,7 +396,7 @@ public class Admin extends LibraryEntry {
      * Add user
      * @param user
      */
-    public static void addUser(final User user) {
+    public void addUser(final User user) {
         users.add(user);
     }
 
@@ -381,7 +405,7 @@ public class Admin extends LibraryEntry {
      *
      * @param song
      */
-    public static void addSongs(final Song song) {
+    public void addSongs(final Song song) {
         songs.add(song);
     }
 
@@ -390,7 +414,7 @@ public class Admin extends LibraryEntry {
      *
      * @param episode
      */
-    public static void addEpisodes(final Episode episode) {
+    public void addEpisodes(final Episode episode) {
         episodes.add(episode);
     }
 
@@ -399,7 +423,7 @@ public class Admin extends LibraryEntry {
      *
      * @param podcast
      */
-    public static void addPodcast(final Podcast podcast) {
+    public void addPodcast(final Podcast podcast) {
         podcasts.add(podcast);
     }
 
@@ -409,7 +433,7 @@ public class Admin extends LibraryEntry {
      * @param artistUsername
      * @return
      */
-    public static List<InfoAlbum> showAlbums(final String artistUsername) {
+    public List<InfoAlbum> showAlbums(final String artistUsername) {
         User artist = getUser(artistUsername);
         if (artist == null || !(artist instanceof Artist)) {
             return null;

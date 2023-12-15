@@ -1,4 +1,4 @@
-package app.user;
+package app.user.contentUser;
 
 public class Announcement {
     private String description;

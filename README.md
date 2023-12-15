@@ -3,7 +3,7 @@
 Am folosit ca schelet rezolvarea oficială a etapei I.
 
 Am adaugat noi clase: 
-- ARTIST - pentru userii de tip "artist". Am implementat cateva metode de care ma ajut in metodele din clasele User si Admin(metoda care sterge un anumit eveniment, metoda care verifica daca un artist are cantece duplicate, dar si una asemanatoare pentru events si merch).
+- ARTIST - pentru userii de tip "artist". Am implementat cateva metode de care ma ajut in metodele din clasele User si Admin(metoda care sterge un anumit eveniment, metoda care verifica daca un artist are cantece duplicate, dar si una asemanatoare pentru evenimente).
 - ANNOUNCEMENT - pentru anunturi
 - EVENT
 - MERCH
@@ -38,5 +38,7 @@ In clasa Admin am implementat metodele:
 - onlineUsers - care afiseaza tot utilizatorii online
 - allUsers - care afiseaza tot utilizatorii
 - getTop5Albums - care afiseaza top 5 cele mai apreciate albume
+- getTop5Songs
 - showAlbums
 Am folosit gpt in commandRunner cand trebuia sa afisez pentru fiecare podcast numele si episoadele.
+Am folosit ca design pattern: singleton.

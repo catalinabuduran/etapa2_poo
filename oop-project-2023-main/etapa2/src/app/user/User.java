@@ -2,7 +2,7 @@ package app.user;
 
 import app.Admin;
 import app.audio.Collections.Playlist;
-import app.audio.Collections.InfoAlbum;
+import app.audio.Collections.infoCollection.InfoAlbum;
 import app.audio.Collections.Album;
 import app.audio.Collections.Podcast;
 import app.audio.Collections.AudioCollection;
@@ -15,6 +15,9 @@ import app.player.Player;
 import app.player.PlayerStats;
 import app.searchBar.Filters;
 import app.searchBar.SearchBar;
+import app.user.contentUser.Announcement;
+import app.user.contentUser.Event;
+import app.user.contentUser.Merch;
 import app.utils.Enums;
 import fileio.input.EpisodeInput;
 import fileio.input.SongInput;
@@ -23,6 +26,7 @@ import lombok.Getter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -249,7 +253,8 @@ public class User extends LibraryEntry {
      * @return the string
      */
     public String select(final int itemNumber, final String userName) {
-        User user = Admin.getUser(userName);
+        Admin admin = Admin.getInstance();
+        User user = admin.getUser(userName);
 
         if (!lastSearched) {
             return "Please conduct a search before making a selection.";
@@ -674,19 +679,20 @@ public class User extends LibraryEntry {
      * @return
      */
     public String switchConnectionStatus(final String currentUsername) {
-        User user = Admin.getUser(currentUsername);
-       if (user.getType().equals("artist") || user.getType().equals("host")) {
+        Admin admin = Admin.getInstance();
+        User user = admin.getUser(currentUsername);
+        if (user.getType().equals("artist") || user.getType().equals("host")) {
             return String.format("%s is not a normal user.", currentUsername);
-       }
-       if (!user.isOnline()) {
-           user.setOnline(true);
-           player.resumeTime();
-           return String.format("%s has changed status successfully.", currentUsername);
-       } else {
-           user.setOnline(false);
-           player.stopTime();
-           return String.format("%s has changed status successfully.", currentUsername);
-       }
+        }
+        if (!user.isOnline()) {
+            user.setOnline(true);
+            player.resumeTime();
+            return String.format("%s has changed status successfully.", currentUsername);
+        } else {
+            user.setOnline(false);
+            player.stopTime();
+            return String.format("%s has changed status successfully.", currentUsername);
+        }
     }
 
     /**
@@ -702,24 +708,25 @@ public class User extends LibraryEntry {
      */
     public static String addUser(final String username, final int age,
                                  final String city, final String userType) {
-        User user = Admin.getUser(username);
+        Admin admin = Admin.getInstance();
+        User user = admin.getUser(username);
 
         if (user != null) {
             return String.format("The username %s is already taken.", username);
         }
         if (userType.equals("user")) {
-            Admin.addUser(new User(username, age, city, userType));
+            admin.addUser(new User(username, age, city, userType));
         } else if (userType.equals("artist")) {
             User artist = new Artist(username, age, city, userType);
             artist.setCurrentPage("ArtistPage");
             artist.setType("artist");
-            Admin.addUser(artist);
+            admin.addUser(artist);
             artist.setOnline(false);
         } else if (userType.equals("host")) {
             User host = new Host(username, age, city, userType);
             host.setCurrentPage("HostPage");
             host.setType("host");
-            Admin.addUser(host);
+            admin.addUser(host);
             host.setOnline(false);
         }
         return String.format("The username %s has been added successfully.", username);
@@ -739,7 +746,8 @@ public class User extends LibraryEntry {
     public static String addPodcast(final String username, final String podcastName,
                                     final Integer timestamp,
                                     final List<EpisodeInput> episodes) {
-        User user = Admin.getUser(username);
+        Admin admin = Admin.getInstance();
+        User user = admin.getUser(username);
         if (user == null) {
             return String.format("The username %s doesn't exist.", username);
         }
@@ -756,11 +764,11 @@ public class User extends LibraryEntry {
             Episode episode = new Episode(episodeInput.getName(),
                     episodeInput.getDuration(), episodeInput.getDescription());
             podcastEpisodes.add(episode);
-            Admin.addEpisodes(episode);
+            admin.addEpisodes(episode);
         }
 
         Podcast podcast = new Podcast(podcastName, username, podcastEpisodes);
-        Admin.getPod().add(podcast);
+        admin.getPod().add(podcast);
         host.getPodcasts().add(podcast);
 
         return String.format("%s has added new podcast successfully.", username);
@@ -781,7 +789,8 @@ public class User extends LibraryEntry {
     public static String addAlbum(final String username, final String albumName,
                                   final int releaseYear, final String description,
                                   final List<SongInput> songs) {
-        User artist = Admin.getUser(username);
+        Admin admin = Admin.getInstance();
+        User artist = admin.getUser(username);
         if (artist == null) {
             return String.format("The username %s doesn't exist.", username);
         }
@@ -803,12 +812,12 @@ public class User extends LibraryEntry {
                     songInput.getTags(), songInput.getLyrics(), songInput.getGenre(),
                     songInput.getReleaseYear(), username);
 
-            Admin.addSongs(song);
+            admin.addSongs(song);
         }
         Album album = new Album(albumName, username, releaseYear, description, songs);
-        List<Album> alb = new ArrayList<Album>(Admin.getAlbums());
+        List<Album> alb = new ArrayList<Album>(admin.getAlbums());
         alb.add(album);
-        Admin.setAlbums(alb);
+        admin.setAlbums(alb);
         artistAsArtist.addAlbum(album);
         return String.format("%s has added new album successfully.", username);
     }
@@ -822,7 +831,8 @@ public class User extends LibraryEntry {
      */
     public static String removeEvent(final String username,
                                      final String eventName) {
-        User user = Admin.getUser(username);
+        Admin admin = Admin.getInstance();
+        User user = admin.getUser(username);
         if (user == null) {
             return String.format("The username %s doesn't exist.", username);
         }
@@ -856,7 +866,8 @@ public class User extends LibraryEntry {
     public static String addEvent(final String username, final String eventName,
                                   final String eventDescription,
                                   final String eventDate) {
-        User user = Admin.getUser(username);
+        Admin admin = Admin.getInstance();
+        User user = admin.getUser(username);
         if (user == null) {
             return String.format("The username %s doesn't exist.", username);
         }
@@ -912,7 +923,8 @@ public class User extends LibraryEntry {
      */
     public static String addMerch(final String username, final String merchName,
                                   final String merchDescription, final double price) {
-        User user = Admin.getUser(username);
+        Admin admin = Admin.getInstance();
+        User user = admin.getUser(username);
         if (user == null) {
             return String.format("The username %s doesn't exist.", username);
         }
@@ -940,8 +952,9 @@ public class User extends LibraryEntry {
      * @return
      */
     public static String
-        printCurrentPage(final String username) {
-        User user = Admin.getUser(username);
+    printCurrentPage(final String username) {
+        Admin admin = Admin.getInstance();
+        User user = admin.getUser(username);
 
         if (user == null) {
             return String.format("User with username %s not found.", username);
@@ -950,8 +963,19 @@ public class User extends LibraryEntry {
 
             switch (user.getCurrentPage()) {
                 case "HomePage":
-                    result.append("Liked songs:\n\t");
-                    result.append(user.showPreferredSongs()).append("\n\n");
+                    result.append("Liked songs:\n\t[");
+                    List<Song> songs = new ArrayList<>(user.getLikedSongs());
+                    songs.sort(Comparator.comparingInt(Song::getLikes).reversed()
+                            .thenComparing(Comparator.comparing(Song::getName)));
+                    boolean variable = true;
+                    for (Song song : songs) {
+                        if (!variable) {
+                            result.append(", ");
+                        }
+                        result.append(song.getName());
+                        variable = false;
+                    }
+                    result.append("]\n\n");
                     result.append("Followed playlists:\n\t[");
                     boolean firstPlaylist = true;
                     for (Playlist playlist : user.getFollowedPlaylists()) {
@@ -964,8 +988,19 @@ public class User extends LibraryEntry {
                     result.append("]");
                     break;
                 case "Home":
-                    result.append("Liked songs:\n\t");
-                    result.append(user.showPreferredSongs()).append("\n\n");
+                    result.append("Liked songs:\n\t[");
+                    List<Song> likedSongs = new ArrayList<>(user.getLikedSongs());
+                    likedSongs.sort(Comparator.comparingInt(Song::getLikes).reversed()
+                            .thenComparing(Song::getName));
+                    boolean variable2 = true;
+                    for (Song song : likedSongs) {
+                        if (!variable2) {
+                            result.append(", ");
+                        }
+                        result.append(song.getName());
+                        variable2 = false;
+                    }
+                    result.append("]\n\n");
                     result.append("Followed playlists:\n\t[");
                     boolean firstPlaylist2 = true;
                     for (Playlist playlist : user.getFollowedPlaylists()) {
@@ -989,102 +1024,102 @@ public class User extends LibraryEntry {
                     }
                     result.append("]\n\n");
                     result.append("Followed playlists:\n\t[");
-                    boolean variable = true;
+                    boolean last = true;
                     for (Playlist playlist : user.getFollowedPlaylists()) {
-                        if (!variable) {
+                        if (!last) {
                             result.append(", ");
                         }
                         result.append(playlist.getName() + " - " + playlist.getOwner());
-                        variable = false;
+                        last = false;
                     }
                     result.append("]");
                     break;
                 case "ArtistPage":
                     if (lastSelected instanceof Artist) {
-                    Artist artist = (Artist) lastSelected;
-                    result.append("Albums:\n\t[");
-                    for (InfoAlbum album : Admin.showAlbums(artist.getUsername())) {
-                        result.append(album.getName());
-                    }
-                    result.append("]\n\n");
-                    result.append("Merch:\n\t[");
-                    boolean firstMerch = true;
-                    for (Merch merch : artist.getMerch()) {
-                        if (!firstMerch) {
-                            result.append(", ");
+                        Artist artist = (Artist) lastSelected;
+                        result.append("Albums:\n\t[");
+                        for (InfoAlbum album : admin.showAlbums(artist.getUsername())) {
+                            result.append(album.getName());
                         }
-                        result.append(merch.getName()).append(" - ").append((int)
-                                Math.floor(merch.getPrice())).append(":\n\t").append(
-                                        merch.getDescription());
-                        firstMerch = false;
-                    }
-                    result.append("]\n\n");
-                    result.append("Events:\n\t[");
-                    boolean firstEvent = true;
-                    for (Event event : artist.getEvents()) {
-                        if (!firstEvent) {
-                            result.append(", ");
+                        result.append("]\n\n");
+                        result.append("Merch:\n\t[");
+                        boolean firstMerch = true;
+                        for (Merch merch : artist.getMerch()) {
+                            if (!firstMerch) {
+                                result.append(", ");
+                            }
+                            result.append(merch.getName()).append(" - ").append((int)
+                                    Math.floor(merch.getPrice())).append(":\n\t").append(
+                                    merch.getDescription());
+                            firstMerch = false;
                         }
-                        result.append(event.getName()).append(" - ").append(
-                                event.getDate()).append(":\n\t").append(event.getDescription());
-                        firstEvent = false;
-                    }
-                    result.append("]");
-                    break;
+                        result.append("]\n\n");
+                        result.append("Events:\n\t[");
+                        boolean firstEvent = true;
+                        for (Event event : artist.getEvents()) {
+                            if (!firstEvent) {
+                                result.append(", ");
+                            }
+                            result.append(event.getName()).append(" - ").append(
+                                    event.getDate()).append(":\n\t").append(event.getDescription());
+                            firstEvent = false;
+                        }
+                        result.append("]");
+                        break;
                     }
                 case "HostPage":
                     if (lastSelected instanceof Host) {
-                    Host host = (Host) lastSelected;
-                    result.append("Podcasts:\n\t[");
-                    boolean firstHost = false;
-                    for (User user1 : Admin.getUsers()) {
-                        if (user1.getUsername().equals(host.getUsername())) {
-                            if (firstHost) {
-                                result.append(", ");
-                            }
-                            boolean firstPodcast = false;
-                            for (Podcast podcast : host.getPodcasts()) {
-                                if (firstPodcast) {
+                        Host host = (Host) lastSelected;
+                        result.append("Podcasts:\n\t[");
+                        boolean firstHost = false;
+                        for (User user1 : admin.getUsers()) {
+                            if (user1.getUsername().equals(host.getUsername())) {
+                                if (firstHost) {
                                     result.append(", ");
                                 }
-                                result.append(podcast.getName());
-                                result.append(":\n\t[");
-                                boolean firstEpisode = false;
-                                for (Episode episode : podcast.getEpisodes()) {
-                                    if (firstEpisode) {
+                                boolean firstPodcast = false;
+                                for (Podcast podcast : host.getPodcasts()) {
+                                    if (firstPodcast) {
                                         result.append(", ");
                                     }
-                                    result.append(episode.getName());
-                                    result.append(" - ");
-                                    result.append(episode.getDescription());
-                                    firstEpisode = true;
+                                    result.append(podcast.getName());
+                                    result.append(":\n\t[");
+                                    boolean firstEpisode = false;
+                                    for (Episode episode : podcast.getEpisodes()) {
+                                        if (firstEpisode) {
+                                            result.append(", ");
+                                        }
+                                        result.append(episode.getName());
+                                        result.append(" - ");
+                                        result.append(episode.getDescription());
+                                        firstEpisode = true;
+                                    }
+                                    result.append("]\n");
+                                    firstPodcast = true;
                                 }
-                                result.append("]\n");
-                                firstPodcast = true;
-                            }
-                            result.append("]");
-                            firstHost = true;
-                        }
-                    }
-                    result.append("\n\n");
-                    result.append("Announcements:\n\t[");
-                    boolean firstAnnouncement = false;
-                    for (User user1 : Admin.getUsers()) {
-                        if (user1.getUsername().equals(host.getUsername())) {
-                            for (Announcement announcement : host.getAnnouncements()) {
-                                if (firstAnnouncement) {
-                                    result.append(", ");
-                                }
-                                result.append(announcement.getName());
-                                result.append(":\n\t");
-                                result.append(announcement.getDescription());
-                                firstAnnouncement = true;
+                                result.append("]");
+                                firstHost = true;
                             }
                         }
-                    }
+                        result.append("\n\n");
+                        result.append("Announcements:\n\t[");
+                        boolean firstAnnouncement = false;
+                        for (User user1 : admin.getUsers()) {
+                            if (user1.getUsername().equals(host.getUsername())) {
+                                for (Announcement announcement : host.getAnnouncements()) {
+                                    if (firstAnnouncement) {
+                                        result.append(", ");
+                                    }
+                                    result.append(announcement.getName());
+                                    result.append(":\n\t");
+                                    result.append(announcement.getDescription());
+                                    firstAnnouncement = true;
+                                }
+                            }
+                        }
 
-                    result.append("\n]");
-                    break;
+                        result.append("\n]");
+                        break;
                     }
                 default:
                     result.append("Unknown page.\n");
@@ -1092,8 +1127,8 @@ public class User extends LibraryEntry {
             }
 
             return result.toString();
-            }
         }
+    }
 
     /**
      * Remove podcast
@@ -1103,29 +1138,30 @@ public class User extends LibraryEntry {
      * @return
      */
     public static String removePodcast(final String username,
-                                           final String podcastName) {
-            User user = Admin.getUser(username);
-            if (user == null) {
-                return String.format("The username %s doesn't exist.", username);
-            }
-
-            if (!(user.getType().equals("host"))) {
-                return String.format("%s is not a host.", username);
-            }
-
-            Host host = (Host) user;
-            if (!host.hasPodcast(podcastName)) {
-                return String.format("%s doesn't have a podcast with the given name.", username);
-            }
-            if (hasUserInteractions(host)) {
-                return String.format("%s can't delete this podcast.", username);
-            }
-
-            host.getPodcasts().removeIf(p -> p.getName().equals(podcastName));
-            Admin.getPod().removeIf(s -> s.getName().equals(podcastName));
-
-            return String.format("%s deleted the podcast successfully.", username);
+                                       final String podcastName) {
+        Admin admin = Admin.getInstance();
+        User user = admin.getUser(username);
+        if (user == null) {
+            return String.format("The username %s doesn't exist.", username);
         }
+
+        if (!(user.getType().equals("host"))) {
+            return String.format("%s is not a host.", username);
+        }
+
+        Host host = (Host) user;
+        if (!host.hasPodcast(podcastName)) {
+            return String.format("%s doesn't have a podcast with the given name.", username);
+        }
+        if (hasUserInteractions(host)) {
+            return String.format("%s can't delete this podcast.", username);
+        }
+
+        host.getPodcasts().removeIf(p -> p.getName().equals(podcastName));
+        admin.getPod().removeIf(s -> s.getName().equals(podcastName));
+
+        return String.format("%s deleted the podcast successfully.", username);
+    }
 
     /**
      * Add announcement
@@ -1136,26 +1172,27 @@ public class User extends LibraryEntry {
      * @param description
      * @return
      */
-        public static String addAnnouncement(final String username,
-                                             final String announcementName,
-                                             final int timestamp,
-                                             final String description) {
-            User user = Admin.getUser(username);
-            if (user == null) {
-                return String.format("The username %s doesn't exist.", username);
-            }
-            if (!(user.getType().equals("host"))) {
-                return String.format("%s is not a host.", username);
-            }
-            Host host = (Host) user;
-            if (host.hasDuplicateAnnouncement(announcementName)) {
-                return String.format("%s has another podcast with the same name.", username);
-            }
-            Announcement newAnnouncement = new Announcement(description, announcementName);
-            host.getAnnouncements().add(newAnnouncement);
-
-            return String.format("%s has successfully added new announcement.", username);
+    public static String addAnnouncement(final String username,
+                                         final String announcementName,
+                                         final int timestamp,
+                                         final String description) {
+        Admin admin = Admin.getInstance();
+        User user = admin.getUser(username);
+        if (user == null) {
+            return String.format("The username %s doesn't exist.", username);
         }
+        if (!(user.getType().equals("host"))) {
+            return String.format("%s is not a host.", username);
+        }
+        Host host = (Host) user;
+        if (host.hasDuplicateAnnouncement(announcementName)) {
+            return String.format("%s has another podcast with the same name.", username);
+        }
+        Announcement newAnnouncement = new Announcement(description, announcementName);
+        host.getAnnouncements().add(newAnnouncement);
+
+        return String.format("%s has successfully added new announcement.", username);
+    }
 
     /**
      * Remove Announcement
@@ -1165,28 +1202,29 @@ public class User extends LibraryEntry {
      * @return
      */
     public static String removeAnnouncement(final String username,
-                                                final String announcementName) {
-            User user = Admin.getUser(username);
-            if (user == null) {
-                return String.format("The username %s doesn't exist.", username);
-            }
-            if (!(user.getType().equals("host"))) {
-                return String.format("%s is not a host.", username);
-            }
-            Host host = (Host) user;
-            if (!host.hasAnnouncement(announcementName)) {
-                return String.format("%s has no announcement with the given name.", username);
-            }
-            Announcement announcementRemove = null;
-            for (Announcement announcement : host.getAnnouncements()) {
-                if (announcement.getName().equals(announcementName)) {
-                    announcementRemove = announcement;
-                    break;
-                }
-            }
-            host.removeAnAnnouncement(host.getAnnouncements(), announcementRemove);
-            return String.format("%s has successfully deleted the announcement.", username);
+                                            final String announcementName) {
+        Admin admin = Admin.getInstance();
+        User user = admin.getUser(username);
+        if (user == null) {
+            return String.format("The username %s doesn't exist.", username);
         }
+        if (!(user.getType().equals("host"))) {
+            return String.format("%s is not a host.", username);
+        }
+        Host host = (Host) user;
+        if (!host.hasAnnouncement(announcementName)) {
+            return String.format("%s has no announcement with the given name.", username);
+        }
+        Announcement announcementRemove = null;
+        for (Announcement announcement : host.getAnnouncements()) {
+            if (announcement.getName().equals(announcementName)) {
+                announcementRemove = announcement;
+                break;
+            }
+        }
+        host.removeAnAnnouncement(host.getAnnouncements(), announcementRemove);
+        return String.format("%s has successfully deleted the announcement.", username);
+    }
 
     /**
      * Delete user
@@ -1195,86 +1233,94 @@ public class User extends LibraryEntry {
      * @return
      */
     public static String deleteUser(final String username) {
-            User user = Admin.getUser(username);
+        Admin admin = Admin.getInstance();
+        User user = admin.getUser(username);
 
-            if (user == null) {
-                return String.format("The username %s doesn't exist.", username);
-            }
-            for (User otherUser : Admin.getUsers()) {
-                if (otherUser.getOwnerCurrentPage() != null) {
-                    if (otherUser.getCurrentPage().equals("ArtistPage")
-                            && user.getType().equals("artist")
-                            && otherUser.getOwnerCurrentPage().equals(username)) {
-                        return String.format("%s can't be deleted.", username);
-                    }
-                }
-            }
-            if (user.getType().equals("artist")) {
-                if (hasUserInteractions(user)) {
-                    return String.format("%s can't be deleted.", username);
-                } else {
-                    Artist artist = (Artist) user;
-                    List<Album> artistAlbums = artist.getAlbums();
-                    for (Album album : artistAlbums) {
-                        for (SongInput songInput : album.getSongs()) {
-                            Song newSong = new Song(songInput.getName(),
-                                    songInput.getDuration(), songInput.getAlbum(),
-                                    songInput.getTags(), songInput.getLyrics(),
-                                    songInput.getGenre(), songInput.getReleaseYear(),
-                                    songInput.getArtist());
-                            Admin.getSong().removeIf(s -> s.getName().equals(newSong.getName()));
-                            newSong.dislike();
-                            for (User user1 : Admin.getUsers()) {
-                                    List<Song> userLikedSongs = user1.getLikedSongs();
-                                    userLikedSongs.removeIf(s ->
-                                            s.getName().equals(newSong.getName()));
-                            }
-                        }
-                    }
-                    Admin.getAlbums().removeAll(artistAlbums);
-                    artistAlbums.clear();
-                }
-            } else if (user.getType().equals("host")) {
-                    for (User otherUser : Admin.getUsers()) {
-                        if (otherUser.getOwnerCurrentPage() != null) {
-                            if (otherUser.getCurrentPage().equals(user.getCurrentPage())
-                                    && otherUser.getOwnerCurrentPage().equals(user.getUsername())) {
-                                return String.format("%s can't be deleted.", username);
-                            }
-                        }
-                    }
-                    if (hasUserInteractions(user)) {
-                        return String.format("%s can't be deleted.", username);
-                    } else {
-                        Host host = (Host) user;
-                        List<Podcast> podcasts = host.getPodcasts();
-                        for (Podcast podcast : podcasts) {
-                            podcast.getEpisodes().clear();
-                        }
-                        host.getPodcasts().clear();
-                    }
-            } else if (user.getType().equals("user")) {
-                if (hasUserInteractions(user)) {
-                    return String.format("%s can't be deleted.", username);
-                } else {
-                    List<Playlist> playlists = user.getPlaylists();
-                    for (Playlist playlist : playlists) {
-                        playlist.getSongs().clear();
-                        for (User user1 : Admin.getUsers()) {
-                            List<Playlist> userFollowedPlaylists = user1.getFollowedPlaylists();
-                            userFollowedPlaylists.removeIf(s ->
-                                    s.getName().equals(playlist.getName()));
-                        }
-                    }
-                    for (Playlist playlist : user.getFollowedPlaylists()) {
-                        playlist.decreaseFollowers();
-                    }
-                    user.getPlaylists().clear();
-                }
-            }
-            Admin.getUsers().remove(user);
-            return String.format("%s was successfully deleted.", username);
+        if (user == null) {
+            return String.format("The username %s doesn't exist.", username);
         }
+        for (User otherUser : admin.getUsers()) {
+            if (otherUser.getOwnerCurrentPage() != null) {
+                if (otherUser.getCurrentPage().equals("ArtistPage")
+                        && user.getType().equals("artist")
+                        && otherUser.getOwnerCurrentPage().equals(username)) {
+                    return String.format("%s can't be deleted.", username);
+                }
+            }
+        }
+        if (user.getType().equals("artist")) {
+            if (hasUserInteractions(user)) {
+                return String.format("%s can't be deleted.", username);
+            } else {
+                Artist artist = (Artist) user;
+                List<Album> artistAlbums = artist.getAlbums();
+                for (Album album : artistAlbums) {
+                    for (SongInput songInput : album.getSongs()) {
+                        Song newSong = new Song(songInput.getName(),
+                                songInput.getDuration(), songInput.getAlbum(),
+                                songInput.getTags(), songInput.getLyrics(),
+                                songInput.getGenre(), songInput.getReleaseYear(),
+                                songInput.getArtist());
+                        admin.getSong().removeIf(s -> s.getName().equals(newSong.getName()));
+                        newSong.dislike();
+                        for (User user1 : admin.getUsers()) {
+                            List<Song> userLikedSongs = user1.getLikedSongs();
+                            userLikedSongs.removeIf(s ->
+                                    s.getName().equals(newSong.getName()));
+                        }
+                    }
+                }
+                admin.getAlbums().removeAll(artistAlbums);
+                artistAlbums.clear();
+            }
+        } else if (user.getType().equals("host")) {
+            for (User otherUser : admin.getUsers()) {
+                if (otherUser.getOwnerCurrentPage() != null) {
+                    if (otherUser.getCurrentPage().equals(user.getCurrentPage())
+                            && otherUser.getOwnerCurrentPage().equals(user.getUsername())) {
+                        return String.format("%s can't be deleted.", username);
+                    }
+                }
+            }
+            if (hasUserInteractions(user)) {
+                return String.format("%s can't be deleted.", username);
+            } else {
+                Host host = (Host) user;
+                List<Podcast> podcasts = host.getPodcasts();
+                for (Podcast podcast : podcasts) {
+                    podcast.getEpisodes().clear();
+                }
+                host.getPodcasts().clear();
+            }
+        } else if (user.getType().equals("user")) {
+            if (hasUserInteractions(user)) {
+                return String.format("%s can't be deleted.", username);
+            } else {
+                List<Playlist> playlists = user.getPlaylists();
+                for (Playlist playlist : playlists) {
+                    for (Song song : playlist.getSongs()) {
+                        song.dislike();
+                        for (User otherUser : admin.getUsers()) {
+                            List<Song> likedSongs = otherUser.getLikedSongs();
+                            likedSongs.removeIf(p -> p.getName().equals(song.getName()));
+                        }
+                    }
+                    playlist.getSongs().clear();
+                    for (User user1 : admin.getUsers()) {
+                        List<Playlist> userFollowedPlaylists = user1.getFollowedPlaylists();
+                        userFollowedPlaylists.removeIf(s ->
+                                s.getName().equals(playlist.getName()));
+                    }
+                }
+                for (Playlist playlist : user.getFollowedPlaylists()) {
+                    playlist.decreaseFollowers();
+                }
+                user.getPlaylists().clear();
+            }
+        }
+        admin.getUsers().remove(user);
+        return String.format("%s was successfully deleted.", username);
+    }
 
     /**
      * Has user interactions
@@ -1286,98 +1332,99 @@ public class User extends LibraryEntry {
      * @return
      */
     private static boolean hasUserInteractions(final User currentUser) {
-            if (currentUser.getType().equals("artist")) {
-                Artist artist = (Artist) currentUser;
-                for (User otherUser : Admin.getUsers()) {
-                    var otherUserSource = otherUser.getPlayer().getSource();
-                    if (!otherUser.getUsername().equals(currentUser.getUsername())
-                            && otherUserSource != null) {
-                        boolean typeNotSong = otherUserSource.getType().equals(
-                                Enums.PlayerSourceType.PODCAST) || otherUserSource.getType().equals(
-                                Enums.PlayerSourceType.PLAYLIST);
-                        if (otherUserSource.getType().equals(Enums.PlayerSourceType.PLAYLIST)) {
-                            if (otherUserSource.getAudioCollection() instanceof Playlist) {
+        Admin admin = Admin.getInstance();
+        if (currentUser.getType().equals("artist")) {
+            Artist artist = (Artist) currentUser;
+            for (User otherUser : admin.getUsers()) {
+                var otherUserSource = otherUser.getPlayer().getSource();
+                if (!otherUser.getUsername().equals(currentUser.getUsername())
+                        && otherUserSource != null) {
+                    boolean typeNotSong = otherUserSource.getType().equals(
+                            Enums.PlayerSourceType.PODCAST) || otherUserSource.getType().equals(
+                            Enums.PlayerSourceType.PLAYLIST);
+                    if (otherUserSource.getType().equals(Enums.PlayerSourceType.PLAYLIST)) {
+                        if (otherUserSource.getAudioCollection() instanceof Playlist) {
                             Playlist playlist = (Playlist) otherUserSource.getAudioCollection();
                             ArrayList<Song> songsFromPlaylist = playlist.getSongs();
 
-                                for (Song song : songsFromPlaylist) {
-                                    if (song.matchesArtist(currentUser.getUsername())) {
-                                        return true;
-                                    }
-                                }
-                            }
-                        }
-                        if (typeNotSong && otherUserSource.getAudioCollection() != null) {
-                            if (otherUserSource.getAudioCollection().getOwner().equals(
-                                    currentUser.getUsername())) {
-                                return true;
-                            }
-                        } else if (otherUserSource.getAudioFile() != null) {
-                            for (Album album : artist.getAlbums()) {
-                                for (SongInput song : album.getSongs()) {
-                                    if (otherUserSource.getAudioFile().getName().
-                                            equals(song.getName())) {
-                                        return true;
-                                    }
+                            for (Song song : songsFromPlaylist) {
+                                if (song.matchesArtist(currentUser.getUsername())) {
+                                    return true;
                                 }
                             }
                         }
                     }
-                }
-            } else if (currentUser.getType().equals("host")) {
-                Host host = (Host) currentUser;
-                for (User otherUser : Admin.getUsers()) {
-                    var otherUserSource = otherUser.getPlayer().getSource();
-                    if (!otherUser.getUsername().equals(currentUser.getUsername())
-                            && otherUserSource != null) {
-                        boolean typeNotPodcast = otherUserSource.getType().equals(
-                                Enums.PlayerSourceType.LIBRARY) || otherUserSource.getType().equals(
-                                        Enums.PlayerSourceType.PLAYLIST);
-                        if (typeNotPodcast && otherUserSource.getAudioCollection() != null) {
-                            if (otherUserSource.getAudioCollection().getOwner().equals(
-                                    currentUser.getUsername())) {
-                                return true;
-                            }
-                        } else if (otherUserSource.getAudioFile() != null) {
-                            for (Podcast podcast : host.getPodcasts()) {
-                                for (Episode episode : podcast.getEpisodes()) {
-                                    if (otherUserSource.getAudioFile().getName().
-                                            equals(episode.getName())) {
-                                        return true;
-                                    }
-                                }
-                            }
+                    if (typeNotSong && otherUserSource.getAudioCollection() != null) {
+                        if (otherUserSource.getAudioCollection().getOwner().equals(
+                                currentUser.getUsername())) {
+                            return true;
                         }
-                    }
-                }
-            } else {
-                for (User otherUser : Admin.getUsers()) {
-                    var otherUserSource = otherUser.getPlayer().getSource();
-                    if (!otherUser.getUsername().equals(currentUser.getUsername())
-                            && otherUserSource != null) {
-                        boolean typeNotPlaylist = otherUserSource.getType().equals(
-                                Enums.PlayerSourceType.LIBRARY) || otherUserSource.getType().equals(
-                                        Enums.PlayerSourceType.PODCAST);
-                        if (typeNotPlaylist && otherUserSource.getAudioCollection() != null) {
-                            if (otherUserSource.getAudioCollection().getOwner().equals(
-                                    currentUser.getUsername())) {
-                                return true;
-                            }
-                        } else if (otherUserSource.getAudioFile() != null) {
-                            for (Playlist playlist : currentUser.getPlaylists()) {
-                                for (Song song : playlist.getSongs()) {
-                                    if (otherUserSource.getAudioFile().getName().
-                                            equals(song.getName())) {
-                                        return true;
-                                    }
+                    } else if (otherUserSource.getAudioFile() != null) {
+                        for (Album album : artist.getAlbums()) {
+                            for (SongInput song : album.getSongs()) {
+                                if (otherUserSource.getAudioFile().getName().
+                                        equals(song.getName())) {
+                                    return true;
                                 }
                             }
                         }
                     }
                 }
             }
-            return false;
+        } else if (currentUser.getType().equals("host")) {
+            Host host = (Host) currentUser;
+            for (User otherUser : admin.getUsers()) {
+                var otherUserSource = otherUser.getPlayer().getSource();
+                if (!otherUser.getUsername().equals(currentUser.getUsername())
+                        && otherUserSource != null) {
+                    boolean typeNotPodcast = otherUserSource.getType().equals(
+                            Enums.PlayerSourceType.LIBRARY) || otherUserSource.getType().equals(
+                            Enums.PlayerSourceType.PLAYLIST);
+                    if (typeNotPodcast && otherUserSource.getAudioCollection() != null) {
+                        if (otherUserSource.getAudioCollection().getOwner().equals(
+                                currentUser.getUsername())) {
+                            return true;
+                        }
+                    } else if (otherUserSource.getAudioFile() != null) {
+                        for (Podcast podcast : host.getPodcasts()) {
+                            for (Episode episode : podcast.getEpisodes()) {
+                                if (otherUserSource.getAudioFile().getName().
+                                        equals(episode.getName())) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        } else {
+            for (User otherUser : admin.getUsers()) {
+                var otherUserSource = otherUser.getPlayer().getSource();
+                if (!otherUser.getUsername().equals(currentUser.getUsername())
+                        && otherUserSource != null) {
+                    boolean typeNotPlaylist = otherUserSource.getType().equals(
+                            Enums.PlayerSourceType.LIBRARY) || otherUserSource.getType().equals(
+                            Enums.PlayerSourceType.PODCAST);
+                    if (typeNotPlaylist && otherUserSource.getAudioCollection() != null) {
+                        if (otherUserSource.getAudioCollection().getOwner().equals(
+                                currentUser.getUsername())) {
+                            return true;
+                        }
+                    } else if (otherUserSource.getAudioFile() != null) {
+                        for (Playlist playlist : currentUser.getPlaylists()) {
+                            for (Song song : playlist.getSongs()) {
+                                if (otherUserSource.getAudioFile().getName().
+                                        equals(song.getName())) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
+        return false;
+    }
 
     /**
      * Change page
@@ -1387,15 +1434,16 @@ public class User extends LibraryEntry {
      * @return
      */
     public static String changePage(final String username,
-                                        final String nextPage) {
-            User user = Admin.getUser(username);
-            if (isValidPage(nextPage)) {
-                user.setCurrentPage(nextPage);
-                return String.format("%s accessed %s successfully.", username, nextPage);
-            } else {
-                return  String.format("%s is trying to access a non-existent page.", username);
-            }
+                                    final String nextPage) {
+        Admin admin = Admin.getInstance();
+        User user = admin.getUser(username);
+        if (isValidPage(nextPage)) {
+            user.setCurrentPage(nextPage);
+            return String.format("%s accessed %s successfully.", username, nextPage);
+        } else {
+            return  String.format("%s is trying to access a non-existent page.", username);
         }
+    }
 
     /**
      * Is Valid Page
@@ -1406,8 +1454,8 @@ public class User extends LibraryEntry {
      * @return
      */
     private static boolean isValidPage(final String nextPage) {
-            return nextPage.equals("Home") || nextPage.equals("LikedContent");
-        }
+        return nextPage.equals("Home") || nextPage.equals("LikedContent");
+    }
 
     /**
      * Is Song In Playlist
@@ -1419,35 +1467,36 @@ public class User extends LibraryEntry {
      * @return
      */
     public static boolean isSongInPlaylist(final User currentUser, final String albumName) {
-            Artist artist = (Artist) currentUser;
-            List<Song> songsFromAlbum = new ArrayList<>();
-            Album currentAlbum = null;
-            for (Album album : artist.getAlbums()) {
-                if (album.getName().equals(albumName)) {
-                    currentAlbum = album;
-                }
+        Admin admin = Admin.getInstance();
+        Artist artist = (Artist) currentUser;
+        List<Song> songsFromAlbum = new ArrayList<>();
+        Album currentAlbum = null;
+        for (Album album : artist.getAlbums()) {
+            if (album.getName().equals(albumName)) {
+                currentAlbum = album;
             }
-            assert currentAlbum != null;
-            for (SongInput songFromAlbum : currentAlbum.getSongs()) {
-                Song song = new Song(songFromAlbum.getName(), songFromAlbum.getDuration(),
-                        songFromAlbum.getAlbum(), songFromAlbum.getTags(),
-                        songFromAlbum.getLyrics(), songFromAlbum.getGenre(),
-                        songFromAlbum.getReleaseYear(), songFromAlbum.getArtist());
-                songsFromAlbum.add(song);
-            }
-            for (User otherUser : Admin.getUsers()) {
-                for (Playlist playlist : otherUser.getPlaylists()) {
-                    for (Song song : playlist.getSongs()) {
-                        for (Song songFromAlbum : songsFromAlbum) {
-                            if (song.getName().equals(songFromAlbum.getName())) {
-                                return true;
-                            }
+        }
+        assert currentAlbum != null;
+        for (SongInput songFromAlbum : currentAlbum.getSongs()) {
+            Song song = new Song(songFromAlbum.getName(), songFromAlbum.getDuration(),
+                    songFromAlbum.getAlbum(), songFromAlbum.getTags(),
+                    songFromAlbum.getLyrics(), songFromAlbum.getGenre(),
+                    songFromAlbum.getReleaseYear(), songFromAlbum.getArtist());
+            songsFromAlbum.add(song);
+        }
+        for (User otherUser : admin.getUsers()) {
+            for (Playlist playlist : otherUser.getPlaylists()) {
+                for (Song song : playlist.getSongs()) {
+                    for (Song songFromAlbum : songsFromAlbum) {
+                        if (song.getName().equals(songFromAlbum.getName())) {
+                            return true;
                         }
                     }
                 }
             }
-            return false;
         }
+        return false;
+    }
 
     /**
      * Remove Album
@@ -1457,27 +1506,34 @@ public class User extends LibraryEntry {
      * @return
      */
     public static String removeAlbum(final String username, final String albumName) {
-            User user = Admin.getUser(username);
-            if (user == null) {
-                return String.format("The username %s doesn't exist.", username);
-            }
-            if (!(user.getType().equals("artist"))) {
-                return String.format("%s is not an artist.", username);
-            }
-            Artist artist = (Artist) user;
-            if (!artist.hasAlbum(albumName)) {
-                return String.format("%s doesn't have an album with the given name.", username);
-            }
-            if (hasUserInteractions(artist) || isSongInPlaylist(user, albumName)) {
-                return String.format("%s can't delete this album.", username);
-            }
-            for (Album album : Admin.getAlbums()) {
-                if (album.getName().equals(albumName)) {
-                    album.getSongs().clear();
-                }
-                artist.getAlbums().remove(album);
-            }
-            return String.format("%s deleted the album successfully.", username);
+        Admin admin = Admin.getInstance();
+        User user = admin.getUser(username);
+        if (user == null) {
+            return String.format("The username %s doesn't exist.", username);
         }
+        if (!(user.getType().equals("artist"))) {
+            return String.format("%s is not an artist.", username);
+        }
+        Artist artist = (Artist) user;
+        if (!artist.hasAlbum(albumName)) {
+            return String.format("%s doesn't have an album with the given name.", username);
+        }
+        if (hasUserInteractions(artist) || isSongInPlaylist(user, albumName)) {
+            return String.format("%s can't delete this album.", username);
+        }
+        for (Album album : admin.getAlbums()) {
+            if (album.getName().equals(albumName)) {
+                for (SongInput songInput : album.getSongs()) {
+                    Song song = new Song(songInput.getName(),
+                            songInput.getDuration(), songInput.getAlbum(),
+                            songInput.getTags(), songInput.getLyrics(), songInput.getGenre(),
+                            songInput.getReleaseYear(), songInput.getArtist());
+                    song.dislike();
+                }
+                album.getSongs().clear();
+            }
+            artist.getAlbums().remove(album);
+        }
+        return String.format("%s deleted the album successfully.", username);
     }
-
+}
