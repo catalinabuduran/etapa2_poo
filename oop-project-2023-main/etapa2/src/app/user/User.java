@@ -453,6 +453,7 @@ public class User extends LibraryEntry {
 
         likedSongs.add(song);
         song.like();
+
         return "Like registered successfully.";
     }
 
@@ -964,15 +965,14 @@ public class User extends LibraryEntry {
             switch (user.getCurrentPage()) {
                 case "HomePage":
                     result.append("Liked songs:\n\t[");
-                    List<Song> songs = new ArrayList<>(user.getLikedSongs());
-                    songs.sort(Comparator.comparingInt(Song::getLikes).reversed()
-                            .thenComparing(Comparator.comparing(Song::getName)));
+                    List<String> songs = new ArrayList<>(user.showPreferredSongs());
+//                    songs.sort(Comparator.comparingInt(Song::getLikes).reversed());
                     boolean variable = true;
-                    for (Song song : songs) {
+                    for (String song : songs) {
                         if (!variable) {
                             result.append(", ");
                         }
-                        result.append(song.getName());
+                        result.append(song);
                         variable = false;
                     }
                     result.append("]\n\n");
@@ -989,15 +989,13 @@ public class User extends LibraryEntry {
                     break;
                 case "Home":
                     result.append("Liked songs:\n\t[");
-                    List<Song> likedSongs = new ArrayList<>(user.getLikedSongs());
-                    likedSongs.sort(Comparator.comparingInt(Song::getLikes).reversed()
-                            .thenComparing(Song::getName));
+                    List<String> likedSongs = new ArrayList<>(user.showPreferredSongs());
                     boolean variable2 = true;
-                    for (Song song : likedSongs) {
+                    for (String song1 : likedSongs) {
                         if (!variable2) {
                             result.append(", ");
                         }
-                        result.append(song.getName());
+                        result.append(song1);
                         variable2 = false;
                     }
                     result.append("]\n\n");
@@ -1262,7 +1260,8 @@ public class User extends LibraryEntry {
                                 songInput.getGenre(), songInput.getReleaseYear(),
                                 songInput.getArtist());
                         admin.getSong().removeIf(s -> s.getName().equals(newSong.getName()));
-                        newSong.dislike();
+                        //newSong.dislike();
+
                         for (User user1 : admin.getUsers()) {
                             List<Song> userLikedSongs = user1.getLikedSongs();
                             userLikedSongs.removeIf(s ->
@@ -1299,7 +1298,9 @@ public class User extends LibraryEntry {
                 List<Playlist> playlists = user.getPlaylists();
                 for (Playlist playlist : playlists) {
                     for (Song song : playlist.getSongs()) {
-                        song.dislike();
+                        //System.out.println(song.getName() + " " + song.getLikes());
+
+                        //song.dislike();
                         for (User otherUser : admin.getUsers()) {
                             List<Song> likedSongs = otherUser.getLikedSongs();
                             likedSongs.removeIf(p -> p.getName().equals(song.getName()));
@@ -1511,16 +1512,20 @@ public class User extends LibraryEntry {
         if (user == null) {
             return String.format("The username %s doesn't exist.", username);
         }
+
         if (!(user.getType().equals("artist"))) {
             return String.format("%s is not an artist.", username);
         }
+
         Artist artist = (Artist) user;
         if (!artist.hasAlbum(albumName)) {
             return String.format("%s doesn't have an album with the given name.", username);
         }
+
         if (hasUserInteractions(artist) || isSongInPlaylist(user, albumName)) {
             return String.format("%s can't delete this album.", username);
         }
+
         for (Album album : admin.getAlbums()) {
             if (album.getName().equals(albumName)) {
                 for (SongInput songInput : album.getSongs()) {
@@ -1528,12 +1533,13 @@ public class User extends LibraryEntry {
                             songInput.getDuration(), songInput.getAlbum(),
                             songInput.getTags(), songInput.getLyrics(), songInput.getGenre(),
                             songInput.getReleaseYear(), songInput.getArtist());
-                    song.dislike();
+                    //song.dislike();
                 }
                 album.getSongs().clear();
             }
             artist.getAlbums().remove(album);
         }
+
         return String.format("%s deleted the album successfully.", username);
     }
 }
