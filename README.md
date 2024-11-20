@@ -1,7 +1,5 @@
 # etapa2_poo
 
-Am folosit ca schelet rezolvarea oficială a etapei I.
-
 Am adaugat noi clase: 
 - ARTIST - pentru userii de tip "artist". Am implementat cateva metode de care ma ajut in metodele din clasele User si Admin(metoda care sterge un anumit eveniment, metoda care verifica daca un artist are cantece duplicate, dar si una asemanatoare pentru evenimente).
 - ANNOUNCEMENT - pentru anunturi
